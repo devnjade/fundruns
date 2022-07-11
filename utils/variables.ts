@@ -1,2 +1,1 @@
-export const flwSecretKey = process.env.NEXT_PUBLIC_FLW_KEY;
-export const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+export const pskSecretKey = process.env.NEXT_NEXT_PUBLIC_PSK_KEY;

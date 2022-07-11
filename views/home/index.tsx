@@ -1,67 +1,94 @@
+import axios from "axios";
 import { Box, TransactionBox, TransactionModal } from "components";
 import React from "react";
-import { getBanks } from "utils/requests";
+import { getBanks, verifyAccount } from "utils/requests";
+import { IBanks } from "utils/types";
 import styles from './index.module.scss';
 
 const HomeView: React.FC = () => {
-  const [bank, setBank] = React.useState<string>('');
   const [accountNumber, setAccountNumber] = React.useState<string>('');
+
   const [amount, setAmount] = React.useState<number>(0);
-  const [verifiedAccountName, setVerifiedAccountName] = React.useState<string | null>('');
+  const [setAmountError, setSetAmountError] = React.useState<string | null>(null);
+
   const [description, setDescription] = React.useState<string>('');
+
   const [showTransactionModal, setShowTransactionModal] = React.useState<boolean>(false);
   const [disabled, setDisabled] = React.useState<boolean>(false);
   const [modalData, setModalData] = React.useState<any>({});
+
+
+  const [bankCode, setBankCode] = React.useState<number | null>(null);
+  const [banks, setBanks] = React.useState<IBanks>();
+  const [verifiedAccountName, setVerifiedAccountName] = React.useState<string | null>('');
 
   const toggleTransactionModal = (data?: any) => {
     setShowTransactionModal(!showTransactionModal);
     setModalData(data);
   }
 
-  console.log(showTransactionModal)
-
   const bankRequest = async () => {
-    const banks = await getBanks();
-    console.log(banks);
+    const res = await getBanks();
+    setBanks(res);
   }
 
-  // React.useEffect(() => {
-  //   bankRequest();
-  // }, []);
+  React.useEffect(() => {
+    bankRequest();
+  }, []);
+
+  const verifyAccRequest = async () => {
+    const res = await verifyAccount(accountNumber, bankCode);
+    console.log(res);
+  }
 
   React.useEffect(() => {
-    if (bank && accountNumber && amount) {
+    if (accountNumber.length === 10) {
+      verifyAccRequest();
+    }
+  }, [accountNumber, bankCode]);
+
+  React.useEffect(() => {
+    if (bankCode && accountNumber && amount && verifiedAccountName) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [accountNumber, amount, bank, verifiedAccountName]);
+  }, [accountNumber, amount, bankCode, verifiedAccountName]);
 
-  React.useEffect(() => {
-    if (amount < 100){
-      console.log('Amount Must Not Be Less Than 100');
-      setDisabled(true);
+  const convertKoboToNaira = (i: number) => {
+    return (i / 100).toFixed(2);
+  }
+
+  const validateAmount = () => {
+    if (amount < 100 || amount > 10000000){
+      setSetAmountError('Amount Must Not Be Less Than 100 / Max Amount Allowed Is 10,000,000');
+      return false;
+    } else{
+      setSetAmountError(null);
+      return true;
     }
-    if (amount > 10000000){
-      console.log('Max Amount Allowed Is 10,000,000');
-      setDisabled(true);
-    }
-  }, [amount]);
+  }
       
   const transferFunds = (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const transferData = {
-      account_bank: bank,
-      account_number: accountNumber,
-      amount,
-      narration: description,
-      currency: 'NGN',
-      reference: `FRUNS-${Date.now()}-${Math.floor(Math.random() * 100)}`,
-      callback_url: '',
-      debit_currency: 'NGN',
-    }
+    const validationRes = validateAmount();
+    console.log(validationRes);
+    if (validationRes === true) {
+      const transferData = {
+        account_bank: bankCode,
+        account_number: accountNumber,
+        amount,
+        narration: description,
+        currency: 'NGN',
+        reference: `FRUNS-${Date.now()}-${Math.floor(Math.random() * 100)}`,
+        callback_url: '',
+        debit_currency: 'NGN',
+      }
 
-    console.log(transferData);
+      console.log(transferData);
+    } else {
+      console.log('error occured');
+    }
   }
 
   console.log(showTransactionModal)
@@ -85,10 +112,12 @@ const HomeView: React.FC = () => {
             <div className={styles.option}>
               <label>Select Bank</label>
               <select 
-                onChange={(e) => setBank(e.target.value)}
+                onChange={(e) => setBankCode(Number(e.target.value))}
               >
                 <option hidden value=''>-- Select Bank --</option>
-                <option>bank</option>
+                {banks?.map((bank: any) => (
+                  <option key={bank.id} value={bank.code}>{bank.name}</option>
+                ))}
               </select>
             </div>
             <div className={styles.option}>
@@ -104,9 +133,12 @@ const HomeView: React.FC = () => {
               <label>Amount</label>
               <input 
                 type="number"
-                onChange={(e) => setAmount(Number(e.target.value))}
+                onChange={(e) => {
+                  setAmount(Number(e.target.value));
+                }}
                 placeholder="0.00"
               />
+              {setAmountError && <span>{setAmountError}</span>}
             </div>
             <div className={styles.option}>
               <label>Description</label>
