@@ -8,7 +8,7 @@ interface ITransactionBox {
 
 const TransactionBox: React.FC<ITransactionBox> = ({ onClick, data }) => {
   return (
-    <div className={styles.container}>
+    <div className={styles.container} onClick={onClick}>
       <div className={styles.left}>
         <div className={styles.type} />
         <div className={styles.details}>

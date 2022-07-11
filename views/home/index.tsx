@@ -12,9 +12,11 @@ const HomeView: React.FC = () => {
   const [showTransactionModal, setShowTransactionModal] = React.useState<boolean>(false);
   const [disabled, setDisabled] = React.useState<boolean>(false);
 
-  const toggleTransactionModal = () => {
+  const toggleTransactionModal = (data?: any) => {
     setShowTransactionModal(!showTransactionModal);
   }
+
+  console.log(showTransactionModal)
 
   const bankRequest = async () => {
     const banks = await getBanks();
@@ -110,10 +112,9 @@ const HomeView: React.FC = () => {
         <div className={styles.right}>
           <Box>
             <p className={styles.title}>Recent Transactions</p>
-            <TransactionBox />
-            <TransactionBox />
-            <TransactionBox />
-            <TransactionBox />
+            <TransactionBox 
+              onClick={toggleTransactionModal}
+            />
           </Box>
         </div>
       </main>

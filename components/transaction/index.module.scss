@@ -11,6 +11,10 @@
   align-items: center;
   justify-content: space-between;
 
+  &:hover{
+    cursor: pointer;
+  }
+
   &:last-child{
     margin-bottom: 0;
   }

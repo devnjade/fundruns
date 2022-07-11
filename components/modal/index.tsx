@@ -1,9 +1,13 @@
 import React from "react";
 import styles from "./index.module.scss";
 
-const TransactionModal: React.FC = () => {
+interface ITModal {
+  onClick?: () => void;
+}
+
+const TransactionModal: React.FC<ITModal> = ({ onClick }) => {
   return (
-    <div className={styles.wrapper}>
+    <div onClick={onClick} className={styles.wrapper}>
       <div className={styles.container}>
 
       </div>
