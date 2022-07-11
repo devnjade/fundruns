@@ -11,9 +11,11 @@ const HomeView: React.FC = () => {
   const [description, setDescription] = React.useState<string>('');
   const [showTransactionModal, setShowTransactionModal] = React.useState<boolean>(false);
   const [disabled, setDisabled] = React.useState<boolean>(false);
+  const [modalData, setModalData] = React.useState<any>({});
 
   const toggleTransactionModal = (data?: any) => {
     setShowTransactionModal(!showTransactionModal);
+    setModalData(data);
   }
 
   console.log(showTransactionModal)
@@ -28,12 +30,12 @@ const HomeView: React.FC = () => {
   // }, []);
 
   React.useEffect(() => {
-    if (bank && accountNumber && amount && verifiedAccountName) {
+    if (bank && accountNumber && amount) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [accountNumber, amount, bank, verifiedAccountName])
+  }, [accountNumber, amount, bank, verifiedAccountName]);
 
   React.useEffect(() => {
     if (amount < 100){
@@ -44,9 +46,10 @@ const HomeView: React.FC = () => {
       console.log('Max Amount Allowed Is 10,000,000');
       setDisabled(true);
     }
-  }, [amount])
+  }, [amount]);
       
-  const transferFunds = () => {
+  const transferFunds = (e: React.SyntheticEvent) => {
+    e.preventDefault();
     const transferData = {
       account_bank: bank,
       account_number: accountNumber,
@@ -61,11 +64,18 @@ const HomeView: React.FC = () => {
     console.log(transferData);
   }
 
+  console.log(showTransactionModal)
+
   return (
     <>
-      {showTransactionModal && <TransactionModal />}
+      {showTransactionModal && (
+        <TransactionModal 
+          onClick={toggleTransactionModal} 
+          data={modalData}
+        />
+      )}
       <main className={styles.wrapper}>
-        <div className={styles.left}>
+        <form onSubmit={transferFunds} className={styles.left}>
           <Box>
             <div className={styles.ttop}>
               <p>Transfer Funds</p>
@@ -106,9 +116,9 @@ const HomeView: React.FC = () => {
                 placeholder="payment description (optional)"
               />
             </div>
-            <button disabled={disabled === true}>Transfer</button>
+            <button  disabled={disabled === true}>Transfer</button>
           </Box>
-        </div>
+        </form>
         <div className={styles.right}>
           <Box>
             <p className={styles.title}>Recent Transactions</p>
