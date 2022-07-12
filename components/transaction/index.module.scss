@@ -1,0 +1,56 @@
+@import 'styles/variables';
+
+.container{
+  margin-bottom: 16px;
+  background: $white-100;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  &:hover{
+    cursor: pointer;
+  }
+
+  &:last-child{
+    margin-bottom: 0;
+  }
+
+  .left{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+
+    .type{
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: $white;
+    }
+
+    .details{
+      display: flex;
+      flex-direction: column;
+
+      p{
+        margin-bottom: 2px;
+        font-weight: bold;
+      }
+
+      span{
+        font-size: 12px;
+        font-weight: 500;
+        color: $text-light;
+      }
+    }
+  }
+
+  .price{
+    font-weight: bold;
+    margin-right: 8px;
+  }
+}
