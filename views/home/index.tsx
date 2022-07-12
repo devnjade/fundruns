@@ -98,7 +98,6 @@ const HomeView: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     const validationRes = validateAmount();
-    console.log(validationRes);
     if (validationRes === true) {
       const transferRecpient = {
         type: 'nuban',
@@ -109,7 +108,6 @@ const HomeView: React.FC = () => {
       }
       transferRecp(transferRecpient)
         .then(res => {
-          console.log(res);
           setRecpCode(res.recipient_code);
 
             const transferData = {
@@ -121,21 +119,19 @@ const HomeView: React.FC = () => {
 
             initTransfer(transferData)
               .then(res => {
-                console.log(res);
                 setLoading(false);
                 toast.success('Transfer Successful');
               })
               .catch(err => {
-                console.log(err);
+    
                 setLoading(false);
                 toast.error(err.response.data.message);
               })
         }).catch(err => {
-          console.log(err);
           setLoading(false);
         });
     } else {
-      console.log('error occured');
+      toast.success('Error Occured In Amount / Account Verification');
       setLoading(false);
     }
   };
