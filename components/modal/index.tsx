@@ -1,9 +1,10 @@
 import React from "react";
+import { ITransactionHistory } from "utils/types";
 import styles from "./index.module.scss";
 
 interface ITModal {
   onClick?: () => void;
-  data?: any
+  data?: ITransactionHistory
 }
 
 const TransactionModal: React.FC<ITModal> = ({ onClick, data }) => {
@@ -12,28 +13,20 @@ const TransactionModal: React.FC<ITModal> = ({ onClick, data }) => {
       <div onClick={(e) => e.stopPropagation()} className={styles.container}>
         <div className={styles.icon} />
         <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
+          <span>Receipent Name</span>
+          <p>{data?.name}</p>
         </div>
         <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
+          <span>Amount</span>
+          <p>{data?.amount}</p>
         </div>
         <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
+          <span>Reason</span>
+          <p>{data?.reason}</p>
         </div>
         <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
-        </div>
-        <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
-        </div>
-        <div className={styles.desc}>
-          <span>Name</span>
-          <p>Value</p>
+          <span>Transaction Reference</span>
+          <p>{data?.ref}</p>
         </div>
         <button onClick={onClick}>Close</button>
       </div>

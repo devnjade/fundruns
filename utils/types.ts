@@ -15,9 +15,37 @@ export interface IVerifyAccount {
   bank_id: number
 }
 
-export interface IVAProps {
-  account_number?: string | number | null,
-  bank_code?: string | number | null,
+export interface ITransactionHistory {
+  id?: number,
+  name?: string,
+  ref?: string,
+  amount?: string,
+  reason?: string
+}
+
+export interface ITransferRecpBody {
+  type: string,
+  bank_code: number | null,
+  account_number: string,
+  currency: string,
+  name: string | null,
+}
+
+export interface ITransferRecpResponse {
+  recipient_code: string,
+  id: number,
+}
+
+export interface IInitTransferBody {
+  source: string,
+  amount: string,
+  recipient: string,
+  reason: string,
+}
+
+export interface IInitTransferResponse {
+  reference: string,
+  status: string,
 }
 
 export interface IResponse<T> {

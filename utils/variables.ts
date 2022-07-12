@@ -1,1 +1,1 @@
-export const pskSecretKey = process.env.NEXT_NEXT_PUBLIC_PSK_KEY;
+export const pskSecretKey = process.env.NEXT_PUBLIC_PSK_KEY;

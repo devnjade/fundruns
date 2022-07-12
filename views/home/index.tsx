@@ -1,52 +1,70 @@
-import axios from "axios";
 import { Box, TransactionBox, TransactionModal } from "components";
+import { data } from "mock/transaction";
 import React from "react";
-import { getBanks, verifyAccount } from "utils/requests";
-import { IBanks } from "utils/types";
+import { toast } from "react-toastify";
+import { getBanks, initTransfer, transferRecp, verifyAccount } from "utils/requests";
+import { IBanks, ITransactionHistory } from "utils/types";
 import styles from './index.module.scss';
 
 const HomeView: React.FC = () => {
+  // form states
   const [accountNumber, setAccountNumber] = React.useState<string>('');
-
-  const [amount, setAmount] = React.useState<number>(0);
-  const [setAmountError, setSetAmountError] = React.useState<string | null>(null);
-
-  const [description, setDescription] = React.useState<string>('');
-
-  const [showTransactionModal, setShowTransactionModal] = React.useState<boolean>(false);
-  const [disabled, setDisabled] = React.useState<boolean>(false);
-  const [modalData, setModalData] = React.useState<any>({});
-
-
   const [bankCode, setBankCode] = React.useState<number | null>(null);
+  const [amount, setAmount] = React.useState<number>(0);
+  const [description, setDescription] = React.useState<string | null>(null);
+
+  // modal states
+  const [showTransactionModal, setShowTransactionModal] = React.useState<boolean>(false);
+  const [modalData, setModalData] = React.useState<ITransactionHistory>();
+
+  // banks states
   const [banks, setBanks] = React.useState<IBanks>();
   const [verifiedAccountName, setVerifiedAccountName] = React.useState<string | null>('');
 
+  // validation states
+  const [amountError, setSetAmountError] = React.useState<string | null>(null);
+  const [disabled, setDisabled] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+
+  // transaction states
+  const [recpCode, setRecpCode] = React.useState<string>('');
+
+  // open & Close transaction modal
   const toggleTransactionModal = (data?: any) => {
     setShowTransactionModal(!showTransactionModal);
     setModalData(data);
-  }
+  };
 
-  const bankRequest = async () => {
-    const res = await getBanks();
-    setBanks(res);
-  }
-
+  // get banks
   React.useEffect(() => {
-    bankRequest();
+    getBanks()
+      .then(res => {
+        setBanks(res);
+      })
   }, []);
 
+  // verify account
   const verifyAccRequest = async () => {
-    const res = await verifyAccount(accountNumber, bankCode);
-    console.log(res);
-  }
+    setLoading(true);
+    verifyAccount(accountNumber, bankCode)
+      .then(res => {
+        setLoading(false);
+        setVerifiedAccountName(res.account_name);
+      })
+      .catch(err => {
+        setLoading(false);
+        toast.error(err.response.data.message);
+      });
+  };
 
+  // init account verification
   React.useEffect(() => {
-    if (accountNumber.length === 10) {
+    if (accountNumber.length === 10 && bankCode) {
       verifyAccRequest();
     }
   }, [accountNumber, bankCode]);
 
+  // form validation
   React.useEffect(() => {
     if (bankCode && accountNumber && amount && verifiedAccountName) {
       setDisabled(false);
@@ -55,10 +73,7 @@ const HomeView: React.FC = () => {
     }
   }, [accountNumber, amount, bankCode, verifiedAccountName]);
 
-  const convertKoboToNaira = (i: number) => {
-    return (i / 100).toFixed(2);
-  }
-
+  // amount validation
   const validateAmount = () => {
     if (amount < 100 || amount > 10000000){
       setSetAmountError('Amount Must Not Be Less Than 100 / Max Amount Allowed Is 10,000,000');
@@ -67,34 +82,67 @@ const HomeView: React.FC = () => {
       setSetAmountError(null);
       return true;
     }
-  }
+  };
+
+  React.useEffect(() => {
+    if (amountError !== null) {
+      toast.error(amountError);
+    }
+  }, [amountError]);
+
+  // reason validation
+  let descriptionDefault = description ? description : '';
       
+  // transfer / form request
   const transferFunds = (e: React.SyntheticEvent) => {
     e.preventDefault();
+    setLoading(true);
     const validationRes = validateAmount();
     console.log(validationRes);
     if (validationRes === true) {
-      const transferData = {
-        account_bank: bankCode,
+      const transferRecpient = {
+        type: 'nuban',
         account_number: accountNumber,
-        amount,
-        narration: description,
+        bank_code: bankCode,
         currency: 'NGN',
-        reference: `FRUNS-${Date.now()}-${Math.floor(Math.random() * 100)}`,
-        callback_url: '',
-        debit_currency: 'NGN',
+        name: verifiedAccountName
       }
+      transferRecp(transferRecpient)
+        .then(res => {
+          console.log(res);
+          setRecpCode(res.recipient_code);
 
-      console.log(transferData);
+            const transferData = {
+              amount: amount.toString(),
+              source: "balance",
+              recipient: recpCode,
+              reason: descriptionDefault
+            }
+
+            initTransfer(transferData)
+              .then(res => {
+                console.log(res);
+                setLoading(false);
+                toast.success('Transfer Successful');
+              })
+              .catch(err => {
+                console.log(err);
+                setLoading(false);
+                toast.error(err.response.data.message);
+              })
+        }).catch(err => {
+          console.log(err);
+          setLoading(false);
+        });
     } else {
       console.log('error occured');
+      setLoading(false);
     }
-  }
-
-  console.log(showTransactionModal)
+  };
 
   return (
     <>
+      {/* Transaction Modal Component */}
       {showTransactionModal && (
         <TransactionModal 
           onClick={toggleTransactionModal} 
@@ -138,7 +186,7 @@ const HomeView: React.FC = () => {
                 }}
                 placeholder="0.00"
               />
-              {setAmountError && <span>{setAmountError}</span>}
+              {amountError && <span>{amountError}</span>}
             </div>
             <div className={styles.option}>
               <label>Description</label>
@@ -148,15 +196,22 @@ const HomeView: React.FC = () => {
                 placeholder="payment description (optional)"
               />
             </div>
-            <button  disabled={disabled === true}>Transfer</button>
+            <button disabled={disabled === true || loading === true}>{loading ? '...' : 'Transfer'}</button>
           </Box>
         </form>
         <div className={styles.right}>
           <Box>
-            <p className={styles.title}>Recent Transactions</p>
-            <TransactionBox 
-              onClick={toggleTransactionModal}
-            />
+            <>
+              <p className={styles.title}>Recent Transactions</p>
+              {data.map(i => (
+                // Transaction Component
+                <TransactionBox 
+                  key={i.id}
+                  onClick={() => toggleTransactionModal(i)}
+                  data={i}
+                />
+              ))}
+            </>
           </Box>
         </div>
       </main>

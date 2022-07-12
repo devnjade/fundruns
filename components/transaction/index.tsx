@@ -1,9 +1,10 @@
 import React from "react";
+import { ITransactionHistory } from "utils/types";
 import styles from "./index.module.scss";
 
 interface ITransactionBox {
   onClick?: () => void;
-  data?: any;
+  data?: ITransactionHistory;
 }
 
 const TransactionBox: React.FC<ITransactionBox> = ({ onClick, data }) => {
@@ -12,11 +13,11 @@ const TransactionBox: React.FC<ITransactionBox> = ({ onClick, data }) => {
       <div className={styles.left}>
         <div className={styles.type} />
         <div className={styles.details}>
-          <p>Bank Transfer</p>
-          <span>Ref: weinvlw1234</span>
+          <p>{data?.name}</p>
+          <span>{data?.ref}</span>
         </div>
       </div>
-      <p className={styles.price}>₦500</p>
+      <p className={styles.price}>₦{data?.amount}</p>
     </div>
   )
 }
