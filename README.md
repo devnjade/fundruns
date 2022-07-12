@@ -1,7 +1,7 @@
 ## FundRuns
 
 * Stack: NextJS, Paystack, Typescript & SASS.
-* [https://paystack.com/docs/transfers](Paystack Transfer Docs)
+* [Paystack Transfer Docs](https://paystack.com/docs/transfers)
 
 ```bash
 yarn 
