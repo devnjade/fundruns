@@ -11,7 +11,7 @@ import {
 import { pskSecretKey } from 'utils/variables';
 
 export const getBanks = async (): Promise<IBanks> => {
-  const { data }: AxiosResponse<IResponse<IBanks>> = await axios.get('https://api.paystack.co/bank?currency=NGN', {
+  const { data }: AxiosResponse<IResponse<IBanks>> = await axios.get('https://api.paystack.co/bank?currency=NGN&country=nigeria', {
     headers: {
       Authorization: `Bearer ${pskSecretKey}`
     }
